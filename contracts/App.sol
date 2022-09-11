@@ -145,7 +145,7 @@ contract App{
 
         if(oneHourHasPassed(users[msg.sender].lastPostTime)){
 
-            require(msg.value > entryFee, "Insufficient ether");
+            require(msg.value >= entryFee, "Insufficient ether! Fee is : 0.000039 ether");
             users[msg.sender].entryNumber += 1;
             users[msg.sender].lastPostTime = block.timestamp; //update users lastPostTime
             emit EntryCreated(msg.sender);
