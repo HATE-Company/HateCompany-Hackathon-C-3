@@ -8,4 +8,4 @@ Moralis Web3 Hackathon C | durmusgulbahar#2098
 3. All informations can be fetch from smart contract by "get" functions.
  - > getUsername(address _addr)  // returns username of the wallet address .
 4. Entries are not stored in SC.
-5. 
+5. Rank-based algo-booster function is not implemented.
