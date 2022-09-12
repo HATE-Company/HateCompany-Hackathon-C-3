@@ -154,7 +154,7 @@ contract App {
          Just 1 hour post duration.
     */
     function postEntryWithFee() external payable notBanned(msg.sender) {
-        if (isUserExist(msg.sender)) {
+        if (isUserExist(msg.sender) && !banControl(msg.sender)) {
             if (whitelist[msg.sender] != true) {
                 if (oneHourHasPassed(users[msg.sender].lastPostTime)) {
                     require(
@@ -166,6 +166,7 @@ contract App {
                     emit EntryCreated(msg.sender);
                 }
             }
+
             //Whitelisted users do not pay fee and except of time duration 1 hour post.
             users[msg.sender].entryNumber += 1;
             users[msg.sender].lastPostTime = block.timestamp; //update users lastPostTime
@@ -222,8 +223,9 @@ contract App {
     /*
     @dev We can set rank of the user according to their NFTs automatically.
     */
-    function setRank(address _addr, Rank rank) public returns (bool) {
-        users[_addr].rank = rank;
+    function setRank(address _addr, Rank newRank) public returns (bool) {
+        users[_addr].rank = newRank;
+        emit RankIsChanged(_addr, newRank);
         return true;
     }
 
@@ -249,13 +251,7 @@ contract App {
         }
     }
 
-    /*
-    @dev Update the rank of the users according to his NFT
-    */
-    function upToRank(address _addr, Rank newRank) public {
-        users[_addr].rank = newRank;
-        emit RankIsChanged(_addr, newRank);
-    }
+  
 
     receive() external payable {
         revert("Can not send ether to the contract directly");
