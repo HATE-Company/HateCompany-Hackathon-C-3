@@ -1,6 +1,6 @@
 # HateCompany-Hackathon-C-3
 
-Moralis Web3 Hackathon C | durmusgulbahar#2098
+Smart Contracts | durmusgulbahar#2098
 
 
 1. No interactions with Rank NFT's -> BRONZE/SILVER/GOLD
