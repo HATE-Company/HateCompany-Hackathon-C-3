@@ -1,4 +1,4 @@
-# HateCompany-Hackathon-C-4
+# HateCompany-Hackathon-C-3
 
 Moralis Web3 Hackathon C | durmusgulbahar#2098
 
