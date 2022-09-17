@@ -10,6 +10,7 @@ pragma solidity >=0.7.0 <0.9.0;
 contract App {
     address payable owner;
     uint256 constant entryFee = 39000000000000 wei; // 0.07 $ or 0.000039 ether
+    uint constant headlineFee = 470000000000000 wei; // 0.7 $ or 0.00047 ether
 
     uint8 constant bronzeToSilverKarma = 250;
     uint16 constant silverToGoldKarma = 1000;
@@ -44,12 +45,14 @@ contract App {
 
     mapping(address => bool) whitelist; // tester/team members
 
-    address[] bronzeListForSilver;
-    address[] silverListForGold;
+    address[] bronzeListForSilverRank;
+    address[] silverListForGoldRank;
 
     // @@@@@@@@@@@ EVENTS @@@@@@@@@@@@
 
     event EntryCreated(address owner);
+
+    event HeadlineCreated(address owner);
 
     event UserBanned(address _addr);
 
@@ -74,6 +77,7 @@ contract App {
         require(msg.sender == owner, "Only Owner");
         _;
     }
+
 
     // @@@@@@@   FUNCTIONS    @@@@@@@
 
@@ -150,16 +154,16 @@ contract App {
     }
 
     /*
-    @dev Takes entry fee from users who wants to post. Not implemented different topic/thread.
+    @dev Takes entry fee from users who wants to post.
          Just 1 hour post duration.
     */
-    function postEntryWithFee() external payable notBanned(msg.sender) {
+    function postEntry() external payable notBanned(msg.sender) {
         if (isUserExist(msg.sender) && !banControl(msg.sender)) {
             if (whitelist[msg.sender] != true) {
                 if (oneHourHasPassed(users[msg.sender].lastPostTime)) {
                     require(
                         msg.value >= entryFee,
-                        "Insufficient ether! Fee is : 0.000039 ether"
+                        "Insufficient ether! Post entry fee is : 0.000039 ether"
                     );
                     users[msg.sender].entryNumber += 1;
                     users[msg.sender].lastPostTime = block.timestamp; //update users lastPostTime
@@ -176,8 +180,64 @@ contract App {
         
     }
 
+
     /*
-    @dev ENtering username is works like Login, so if _addr has no name, there is no user.
+    @dev If user exist , not banned and GOLD rank can create headline.
+    */
+    function createHeadline() external payable notBanned(msg.sender){
+        if (isUserExist(msg.sender) && !banControl(msg.sender) && getRank(msg.sender) == Rank.GOLD) {
+            if (whitelist[msg.sender] != true) {
+                if (oneHourHasPassed(users[msg.sender].lastPostTime)) {
+                    require(
+                        msg.value >= headlineFee,
+                        "Insufficient ether! Headline fee is : 0.00047 ether"
+                    );
+                    users[msg.sender].entryNumber += 1;
+                    users[msg.sender].lastPostTime = block.timestamp; //update users lastPostTime
+                    emit HeadlineCreated(msg.sender);
+                }
+            }
+
+            //Whitelisted users do not pay fee and except of time duration 1 hour post.
+            users[msg.sender].entryNumber += 1;
+            users[msg.sender].lastPostTime = block.timestamp; //update users lastPostTime
+            emit HeadlineCreated(msg.sender);
+        }
+    }
+
+     /*
+    @dev Users can upvote entries. If voters' rank is "BRONZE" and entry owner rank is bigger than "BRONZE".
+         Otherwise "BRONZE" users can not upvote each other's entries.
+    @params _addr -> Entry owner,
+    */
+    function upvote(address _addr) public returns (bool) {
+        if (
+            users[msg.sender].rank == Rank.BRONZE &&
+            users[_addr].rank > Rank.BRONZE
+        ) {
+            users[_addr].karma += 1;
+            emit Upvoted(msg.sender, _addr);
+            return true;
+        } else {
+            revert("You can not upvote the Newcomers' entries.");
+        }
+    }
+
+
+    function addToSilverList(address _addr) public {
+
+        require(getKarma(_addr)>=bronzeToSilverKarma,"User's karma must be bigger than 250");
+        bronzeListForSilverRank.push(_addr);
+    }
+
+    function addToGoldList(address _addr) public {
+        require(getKarma(_addr)>=silverToGoldKarma,"User's karma must be bigger than 1000");
+        silverListForGoldRank.push(_addr);
+    }
+
+
+    /*
+    @dev Entering username is works like Login, so if _addr has no name, there is no user.
     */
     function isUserExist(address _addr) public view returns (bool) {
         //convert string to bytes
@@ -233,23 +293,7 @@ contract App {
         return users[_addr].karma;
     }
 
-    /*
-    @dev Users can upvote entries. If voters' rank is "BRONZE" and entry owner rank is bigger than "BRONZE".
-         Otherwise "BRONZE" users can not upvote each other's entries.
-    @params _addr -> Entry owner,
-    */
-    function upvote(address _addr) public returns (bool) {
-        if (
-            users[msg.sender].rank == Rank.BRONZE &&
-            users[_addr].rank > Rank.BRONZE
-        ) {
-            users[_addr].karma += 1;
-            emit Upvoted(msg.sender, _addr);
-            return true;
-        } else {
-            revert("You can not upvote the Newcomers' entries.");
-        }
-    }
+   
 
   
 
