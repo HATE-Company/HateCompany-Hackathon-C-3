@@ -16,6 +16,5 @@ Smart Contracts | durmusgulbahar#2098
     - > database/{user_wallet_address}/entries/
     - > database/{user_wallet_address}/headlines/
 - [x] Restrictions coded like, user must be exist and shouldn't be banned to post entry or      create headline
-- [ ] 
 - [ ] Upvote counter and leaderboards.
-- [ ] Created Silver list and Gold list consist of addresses who posted required entry to up to rank.
+- [x] Created Silver list and Gold list consist of addresses who posted required entry to up to rank.
